@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+       "http://mybatis.org/dtd/mybatis-3-config.dtd">
+   <configuration>
+       <settings>
+             <!-- resultMap里面的association和collection标签都支持懒加载
+                                             使用懒加载后会在主查询全部执行完之后，再去执行子查询
+                                            第一个是延迟加载的全局开关
+               -->
+             <setting name="lazyLoadingEnabled" value="true"/>  
+             <setting name="aggressiveLazyLoading" value="false"/> 
+         <!-- 将mybatis的执行过程显示在控制台 -->
+	         <setting name="logImpl" value="STDOUT_LOGGING"/>
+	         <!--开启驼峰式命名 -->
+	         <setting name="mapUnderscoreToCamelCase" value="true"/>
+        </settings>
+        <!-- 给实体类取一个别名，方便使用 -->
+        <typeAliases>
+           <!--  <typeAlias type="com.jlx.model.User" alias="_User"/> -->
+            <package name="com.jlx.model"/>
+        </typeAliases>
+     
+       <!--配置映射文件  -->
+       <mappers>         
+          <package name="com.jlx.dao"/>
+       </mappers>        
+   </configuration>    

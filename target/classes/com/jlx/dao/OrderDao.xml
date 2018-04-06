@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jlx.dao.OrderDao">
+   <resultMap type="Order" id="orderMap" autoMapping="true">
+      <id property="orderId" column="order_id"/>
+      <association property="user" javaType="User" autoMapping="true">
+         <id property="userId" column="user_id"/>
+      </association>
+      <association property="shoe" javaType="Shoe" autoMapping="true">
+         <id property="shoeId" column="shoe_id"/>
+      </association>
+      <association property="raddress" javaType="Raddress" autoMapping="true">
+         <id property="addressId" column="address_id"/>
+      </association>
+      <association property="comment" javaType="Comment" autoMapping="true">
+        <id property="commentId" column="comment_id"/>
+      </association>
+   </resultMap>
+   <!-- 进入订单界面 -->
+   <select id="gotoOrder" resultMap="orderMap" parameterType="java.lang.String">
+      select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where o.order_flag= #{orderFlag} and 
+      o.pay_flag = 1 and o.del_flag = 0
+      order by order_time  desc
+   </select>
+   
+   <select id="gotoOrderDiv" resultMap="orderMap" parameterType="java.util.Map">
+       select * from (select a.*,ROWNUM rn from 
+      (select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where o.order_flag=#{orderFlag} and 
+      o.pay_flag = 1 and o.del_flag = 0 
+      order by order_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}   
+   </select>
+   <!-- 查询订单界面 -->
+   <select id="searchOrder" resultMap="orderMap" parameterType="java.util.Map">
+      select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where o.order_flag= #{orderFlag}
+      and (u.user_realName like '%'||#{searchName} ||'%' or o.order_id like '%'||#{searchName} ||'%')
+      and o.pay_flag = 1 and o.del_flag = 0 order by order_time  desc
+   </select>
+   
+   <select id="searchOrderDiv" resultMap="orderMap" parameterType="java.util.Map">
+       select * from (select a.*,ROWNUM rn from 
+      (select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where o.order_flag=#{orderFlag}
+      and (u.user_realName like '%'||#{searchName} ||'%' or o.order_id like '%'||#{searchName} ||'%')
+      and o.pay_flag = 1 and o.del_flag = 0 order by order_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}   
+   </select>
+   <!-- 查看订单详情 -->
+   <select id="getOrderById" parameterType="java.lang.String" resultMap="orderMap">
+      select * from t_order o inner join t_rAddress r on
+      o.address_id = r.address_id inner join t_shoe s on
+      s.shoe_id = o.shoe_id where order_id = #{orderId}
+   </select>
+   <select id="getProvince" parameterType="java.lang.Integer" resultType="Province">
+     select * from t_province where province_id = #{provinceId}
+   </select>
+   <select id="getCity" parameterType="java.lang.Integer" resultType="City">
+     select * from t_city where city_id = #{cityId}
+   </select>
+   <!-- 发货 -->
+   <update id="sendOrder" parameterType="java.lang.String">
+      update t_order o set o.order_flag = 1 
+      where order_id = #{orderId} 
+   </update>
+   <!-- 收货 -->
+   <select id="getchartByid" parameterType="java.lang.String" resultType="Chart">
+      select * from t_chart c where c.type_id =#{typeId}
+   </select>
+   <insert id="addChart" parameterType="Chart">
+     insert into t_chart values(#{chartId},#{typeId},#{sellNum},#{sellMoney})
+   </insert>
+   <update id="addtoChart" parameterType="Chart">
+     update t_chart c set c.sell_Num = c.sell_Num+#{sellNum},
+     c.sell_money = #{sellMoney}+c.sell_Money where c.chart_Id = #{chartId}
+   </update>
+   <select id="getRankById" parameterType="java.lang.String" resultType="Rank">
+     select * from t_rank where shoe_id = #{shoeId}
+   </select>
+   <insert id="addRank" parameterType="Rank">
+     insert into t_rank values(#{shoeId},#{sellNum})
+   </insert>
+   <update id="addtoRank" parameterType="Rank">
+     update t_rank set sell_num = sell_num+#{sellNum}
+     where shoe_id = #{shoeId}
+   </update>
+   <update id="receiveOrder" parameterType="java.lang.String">
+      update t_order o set o.order_flag = 2 
+      where order_id = #{orderId} 
+   </update>
+   <!-- 添加订单提醒 -->
+   <update id="addOrdertoremind" parameterType="java.lang.Integer">
+      update t_remind set add_order = add_order+#{addOrder}
+   </update>
+   <!-- 待付款 -->
+   <select id="personStayOrder" parameterType="java.lang.String" resultMap="orderMap">
+      select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where (o.pay_flag = 0 or o.pay_flag = 2)  and o.del_flag = 0
+      and u.user_id = #{userId}
+      order by order_time  desc
+   </select>
+   <select id="personStayOrderDiv" parameterType="java.util.Map" resultMap="orderMap">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where (o.pay_flag = 0 or o.pay_flag = 2) and o.del_flag = 0
+      and u.user_id = #{userId}
+      order by order_time  desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}   
+   </select>
+   <!-- 个人查看订单 -->
+   <select id="personOrder" parameterType="java.lang.String" resultMap="orderMap">
+      select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where o.order_flag!=2 and o.pay_flag = 1 and o.del_flag=0
+      and u.user_id = #{userId}
+      order by order_time  desc
+   </select>
+   <select id="personOrderDiv" parameterType="java.util.Map" resultMap="orderMap">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where o.order_flag!=2 and o.pay_flag = 1 and o.del_flag=0
+      and u.user_id = #{userId}
+      order by order_time  desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}   
+   </select>
+   <!-- 查看历史购买 -->
+   <select id="personBuy" parameterType="java.lang.String" resultMap="orderMap">
+      select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id left join t_comment co on
+      co.order_Id = o.order_Id  where o.order_flag = 2
+      and u.user_id = #{userId}
+      order by order_time  desc
+   </select>
+   <select id="personBuyDiv" parameterType="java.util.Map" resultMap="orderMap">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_order o inner join t_user u on
+      u.user_id = o.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id left join t_comment co on
+      co.order_Id = o.order_Id where o.order_flag= 2
+      and u.user_id = #{userId}
+      order by order_time  desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}   
+   </select>
+   <!-- 品论 -->
+   <insert id="comment" parameterType="Comment">
+     insert into t_comment(comment_id,comment_content,user_id,order_id,comment_time)
+     values(#{commentId},#{commentContent},#{userId},#{orderId},sysdate)
+   </insert>
+   <!-- 新增评论提醒 -->
+   <update id="addcommenttoremind">
+      update t_remind set add_comment = add_comment+1
+   </update>
+   <update id="initRemind" parameterType="java.lang.String">
+      update t_remind set add_order = 0 where user_id = #{userId}
+   </update>
+   <update id="updatePayFlag" parameterType="java.lang.String">
+      update t_order set pay_flag = 1,order_time = sysdate where order_id = #{orderId}
+   </update>
+   <update id="orderDel" parameterType="java.lang.String">
+      update t_order set del_flag = 1 where order_id = #{orderId}
+   </update>
+   <update id="addShoeNum" parameterType="java.lang.String">
+      update t_shoe set shoe_stock = shoe_stock +(select order_Buynum from t_order where order_id = #{orderId})
+      where shoe_id =(select shoe_id from t_order where order_id = #{orderId})
+   </update>
+   <update id="outPay" parameterType="java.lang.String">
+      update t_order set pay_flag = 2 where order_id = #{orderId}
+   </update>
+   <select id="getOrderInfo" parameterType="java.lang.String" resultType="Order">
+      select * from t_order where order_id = #{orderId}
+   </select>
+   
+</mapper>

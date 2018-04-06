@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/context 
+     http://www.springframework.org/schema/context/spring-context-4.3.xsd
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+     http://www.springframework.org/schema/tx 
+     http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+     
+     <!-- 加载数据库的资源文件 -->
+     <context:property-placeholder location="classpath:db.properties"/>
+     <!--以dbcp连接池的方式连接数据库  -->
+     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+          <property name="driverClassName" value="${jdbc.driver}"></property>
+          <property name="url" value="${jdbc.url}"></property>
+          <property name="username" value="${jdbc.username}"></property>
+          <property name="password" value="${jdbc.password}"></property>
+          <!-- sql的心跳测试 -->
+          <property name= "testWhileIdle" ><value> true </value></property>
+          <property name= "testOnBorrow" ><value> false </value></property>
+          <property name= "testOnReturn" ><value> false </value></property>
+          <property name= "validationQuery" ><value>select sysdate from dual</value></property>
+          <property name= "validationQueryTimeout" ><value>1</value></property>
+          <property name= "timeBetweenEvictionRunsMillis" ><value>24000</value></property>
+          <property name= "numTestsPerEvictionRun" ><value>16</value></property>
+     </bean>
+     <!--创建sqlsession的工厂  -->
+     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+            <property name="dataSource" ref="dataSource"></property>
+            <property name="configLocation" value="classpath:mybatis-conf.xml"></property>
+     </bean>
+     <!-- 配置数据源的事务管理 -->
+     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+          <property name="dataSource" ref="dataSource"></property>
+     </bean>
+     <!--为了用注解的形式让事务生效  -->
+     <tx:annotation-driven transaction-manager="transactionManager"/>
+     <!-- 用注解的形式配置bean -->
+     <context:component-scan base-package="com.jlx" />
+     <bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.jlx.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	 </bean>
+</beans>

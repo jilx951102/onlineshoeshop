@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jlx.dao.CartDao">
+
+   <resultMap type="Cart" id="cartMap" autoMapping="true">
+      <id property="cartId" column="cart_id"/>
+      <association property="shoe" javaType="Shoe" autoMapping="true">
+         <id property="shoeId" column="shoe_id"/>  
+      </association>
+   </resultMap>
+   <!-- 购物车分页 -->
+   <select id="getShoeGoods" parameterType="java.lang.String" resultMap="cartMap">
+      select * from t_cart c left join t_shoe s on c.shoe_id = s.shoe_id
+      where c.cart_flag = 0 and c.user_id = #{userId} order by c.cart_time desc
+   </select>
+   
+   <select id="getShoeGoodsDiv" parameterType="java.util.Map" resultMap="cartMap">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_cart c left join t_shoe s on c.shoe_id = s.shoe_id
+      where c.cart_flag = 0 and c.user_id = #{userId} order by c.cart_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}     
+   </select>
+   <!-- 获取用户一共购买的数量 -->
+   <select id="getBuyCount" parameterType="java.lang.String" resultType="Order">
+      select * from t_order where user_id = #{userId}
+      and order_flag =2
+   </select>
+   <!-- 改变购物车商品数量 -->
+   <update id="addCount" parameterType="java.util.Map">
+      update t_cart c set c.cart_buyNum  = #{cartBuynum} where c.cart_id = #{cartId}
+   </update>
+   <update id="cartDel" parameterType="java.lang.String">
+     update t_cart c set c.cart_flag =1 where c.cart_id = #{cartId}
+   </update>
+   <select id="getCartGoods" parameterType="java.lang.String" resultMap="cartMap">
+     select * from t_cart c left join t_shoe s on c.shoe_id = s.shoe_id where c.cart_Id =#{cartId}
+   </select>
+   <!-- 确认订单 -->
+   <update id="cutShoe" parameterType="Shoe">
+     update t_shoe set shoe_stock = shoe_stock-#{shoeStock} where shoe_id = #{shoeId}
+   </update>
+   <insert id="addOrder" parameterType="Order">
+     insert into t_order(order_id,shoe_id,user_id,order_time,address_id,order_buyNum,order_money)
+                 values(#{orderId},#{shoeId},${userId},sysdate,#{addressId},#{orderBuynum},#{orderMoney})
+   </insert>
+</mapper>

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jlx.dao.UserDao">
+   <insert id="userRegister" parameterType="User">
+       insert into T_User(user_Id,user_Name,user_Password,user_Realname,user_phone,user_time)
+       values(#{userId},#{userName},#{userPassword},#{userRealname},#{userPhone},sysdate)   
+   </insert>
+   <!-- 新增用户提醒 -->
+   <update id="addUserToremind">
+      update t_remind set add_User = add_user +1
+   </update>
+   <!-- 检查用户名是否唯一 -->
+   <select id="findUserByName" parameterType="java.lang.String" resultType="java.lang.Integer">
+       select count(1) from T_User where user_Name = #{userName} and role_id = 0
+   </select>
+   <!-- 登录 -->
+   <select id="login" parameterType="User" resultType="User">
+      select * from T_User where user_Name = #{userName} and user_Password = #{userPassword}
+      and role_id = 0
+   </select>
+   <select id="initLevel" resultType="Level">
+     select * from t_level
+   </select>
+   <update id="editLevel" parameterType="Level">
+     update t_level set level_count = #{levelCount},
+     level_cut = #{levelCut} where level_Id = #{levelId}
+   </update>
+   <!-- 初期进入用户画面 -->
+   <select id="initPeople" resultType="User">
+      select u.*,(select count(*) from t_order o where o.ORDER_FLAG=2 and o.USER_ID = u.USER_ID) 
+      as level_Count from t_user u  where u.role_id=0 order by u.user_time
+   </select>
+      <!-- 初期进入用户画面分页 -->
+   <select id="initPeopleDiv" resultType="User" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      ( select u.*,(select count(*) from t_order o where o.ORDER_FLAG=2 and o.USER_ID = u.USER_ID) 
+        as level_Count from t_user u  where u.role_id=0 order by u.user_time)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}        
+   </select>
+    <!-- 搜索会员画面 -->
+   <select id="searchPeople" resultType="User" parameterType="java.util.Map">
+      select * from (
+      select u.*,(select count(*) from t_order o where o.ORDER_FLAG=2 and o.USER_ID = u.USER_ID) 
+      as level_Count from t_user u 
+      where (user_Name like '%'||#{userName} ||'%' or user_realName like '%'||#{userName} ||'%')  
+      and u.role_id=0      
+      order by u.user_time
+      )
+       where 1=1
+       <if test="next !=0">
+            and level_Count >=#{first}
+          <if test="next > first">
+            and level_Count&lt;#{next}
+          </if> 
+        </if>
+   </select>
+      <!-- 搜索会员画面分页 -->
+   <select id="searchPeopleDiv" resultType="User" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      ( 
+        select * from (
+        select u.*,(select count(*) from t_order o where o.ORDER_FLAG=2 and o.USER_ID = u.USER_ID) 
+        as level_Count from t_user u 
+        where (user_Name like '%'||#{userName} ||'%' or user_realName like '%'||#{userName} ||'%')
+        and u.role_id=0  order by u.user_time
+        ) where 1=1
+        <if test="next !=0">
+          and level_Count >=#{first}
+          <if test="next > first">
+            and level_Count&lt;#{next}
+          </if> 
+        </if>
+      )a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}        
+   </select>
+   <select id="getUserByName" parameterType="java.lang.String" resultType="User">
+     select * from t_user where user_name = #{userName} and role_id = 0
+   </select>
+   <update id="changePass" parameterType="java.lang.String">
+     update t_user set user_Password =#{userPassword}
+     where user_name = #{userName}
+   </update>
+   <!-- 获得用户购物车里面的数量 -->
+   <select id="getCartCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+      select Count(*) from t_cart where user_Id = #{userId} and cart_flag = 0
+   </select>
+   <select id="getUserById" parameterType="java.lang.String" resultType="User">
+      select * from t_user where user_id = #{userId}
+   </select>
+   <!-- 修改用户信息 -->
+   <update id="editInfo" parameterType="User" >
+      update t_user set user_realname = #{userRealname},user_phone = #{userPhone}
+      <if test="userBirthday !=null">,user_birthday = #{userBirthday}</if>
+      <if test="userPicture !=null">,user_picture = #{userPicture}</if>
+      <if test="userEmail !=null">,user_email = #{userEmail}</if>
+      where user_id = #{userId}
+   </update>
+   
+   <select id="getOldPass" parameterType="User" resultType="java.lang.Integer">
+      select Count(1) from t_user where user_id=#{userId}
+      and user_password = #{userPassword}
+   </select>
+   
+   <update id="changePassById" parameterType="User">
+     update t_user set user_password = #{userPassword}
+     where user_id = #{userId}
+   </update>
+   
+   <select id="getAllProvince" resultType="Province">
+     select * from t_Province
+   </select>
+   <select id="getCityByProvince" parameterType="java.lang.Integer" resultType="City">
+     select * from t_city where province_id = #{provinceId}
+   </select>
+   <insert id="addAddress" parameterType="Address">
+      insert into t_address values(#{addressId},#{userId},#{receiveName},#{receicePhone},#{cityId},#{provinceId},#{addressDetail},0,#{addressCode})
+   </insert>
+   <insert id="addAddress2" parameterType="Address">
+      insert into t_raddress 
+      (address_id,user_id,receive_name,receice_phone,city_id,province_id,address_Detail,address_Code)
+      values(#{addressId},#{userId},#{receiveName},#{receicePhone},#{cityId},#{provinceId},#{addressDetail},#{addressCode})
+   </insert>
+   <!-- 获取用户的收获所有地址 -->
+   <select id="getAllAddress" parameterType="java.lang.String" resultType="Address">
+      select * from t_address ta inner join t_province tp on tp.province_id = ta.province_Id
+      inner join t_city c on c.city_Id = ta.city_Id 
+      where user_id =#{userId} and address_Flag !=2
+   </select>
+   <select id="getAllAddressDiv" parameterType="java.util.Map" resultType="Address">
+       select * from (select a.*,ROWNUM rn from 
+      ( select * from t_address ta inner join t_province tp on tp.province_id = ta.province_Id
+      inner join t_city c on c.city_Id = ta.city_Id 
+      where user_id =#{userId} and address_Flag !=2)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}      
+   </select>
+   <!-- 对地址的操作 -->
+   <select id="getDefaultAddress" parameterType="java.lang.String" resultType="Address">
+     select * from t_address where user_id = #{userId}
+     and address_flag = 1
+   </select>
+   <update id="removeDefault" parameterType="java.lang.String">
+      update t_address set  address_flag = 0 where address_id = #{addressId}
+   </update>
+   <update id="setDefault" parameterType="java.lang.String">
+      update t_address set  address_flag = 1 where address_id = #{addressId}
+   </update>
+   <select id="addressEdit2" parameterType="java.lang.String" resultType="Address">
+      select * from t_address ta inner join t_province tp on tp.province_id = ta.province_Id
+      inner join t_city c on c.city_Id = ta.city_Id 
+      where ta.address_id = #{addressId}
+   </select>
+   <update id="updateAddress" parameterType="Address">
+     update t_address set receice_phone = #{receicePhone},receive_Name = #{receiveName},
+     city_id = #{cityId},province_id = #{provinceId},address_code = #{addressCode},address_detail = #{addressDetail}
+     where address_id = #{addressId}
+   </update>
+   <update id="addressDel" parameterType="java.lang.String">
+     update t_address set address_flag = 2 where address_id = #{addressId}
+   </update>
+   <select id="getAddressById" parameterType="java.lang.String" resultType="Address">
+       select * from t_address where address_id = #{addressId}  
+   </select>
+   <!-- 对管理员的操作 -->
+   <select id="getAllAdmin" resultType="User">
+      select * from t_user u where u.role_id !=0 and u.admin_flag = 0 order by u.user_Time
+   </select>
+   <select id="getAllAdminDiv" resultType="User" parameterType="java.util.Map">
+       select * from (select a.*,ROWNUM rn from 
+      ( select * from t_user u where u.role_id !=0 and u.admin_flag = 0 order by u.user_Time)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}  
+   </select>
+   <select id="searchAdmin" resultType="User" parameterType="java.lang.String">
+      select * from t_user u where u.role_id !=0 and u.admin_flag = 0 
+      and (u.user_name like '%'||#{searchName} ||'%' or u.user_realName like '%'||#{searchName} ||'%') order by u.user_Time
+   </select>
+   <select id="searchAdminDiv" resultType="User" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      ( select * from t_user u where u.role_id !=0 and u.admin_flag = 0 
+      and (u.user_name like '%'||#{searchName} ||'%' or u.user_realName like '%'||#{searchName} ||'%')order by u.user_Time)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}  
+   </select>
+   <select id="getAdminById" resultType="User" parameterType="java.lang.String">
+     select * from t_user where user_id = #{userId}
+   </select>
+   <select id="getAdminByName" resultType="User" parameterType="java.lang.String">
+      select * from t_user where user_name = #{userName} and role_id !=0
+   </select>
+   <insert id="addAdmin" parameterType="User">
+      insert into t_user(user_id,user_name,user_realName,user_phone,user_password,user_email,role_id,user_time)
+       values(#{userId},#{userName},#{userRealname},#{userPhone},#{userPassword},#{userEmail},1,sysdate)
+   </insert>
+   <insert id="addremind" parameterType="java.lang.String">
+      insert into t_remind(user_id) values(#{userId})
+   </insert>
+   <update id="editUser" parameterType="User">
+      update t_user set user_realName = #{userRealname},
+      user_phone = #{userPhone},user_Email=#{userEmail}
+      where user_id = #{userId}
+   </update>
+   <update id="adminDel" parameterType="java.lang.String">
+      update t_user set admin_flag = 1 where user_id = #{userId}
+   </update>
+   <update id="changeAdminPass" parameterType="User">
+     update t_user u set u.user_password = #{userPassword}
+     where u.user_id = #{userId}
+   </update>
+   <!-- 管理员登录 -->
+   <select id="adminLogin" parameterType="User" resultType="User">
+       select * from T_User where user_Name = #{userName} and user_Password = #{userPassword}
+      and role_id != 0 
+   </select>
+   <insert id="addLoginlog" parameterType="LoginLog">
+      insert into t_loginlog values(#{userId},#{logId},sysdate)
+   </insert>
+   <select id="getOldPassById" parameterType="java.lang.String" resultType="User">
+      select * from t_user where user_id = #{userId}
+   </select>
+   <!-- 进入报表管理界面 -->
+   <select id="gotoChart" resultType="Chart">
+     select c.*,t.type_name as typeName from t_chart c inner join t_type t on c.type_id= t.type_id
+     order by c.sell_num desc
+   </select>
+   
+   <select id="gotoChart2" resultType="Chart">
+     select c.*,t.type_name as typeName from t_chart c inner join t_type t on c.type_id= t.type_id
+     order by c.sell_money desc
+   </select>
+   
+   <select id="getRemind" parameterType="java.lang.String" resultType="Remind">
+      select * from t_remind where user_id = #{userId}
+   </select>
+   <select id="getLog" resultType="LoginLog">
+      select * from (select l.*,u.user_realName as user_realName from t_loginlog l
+      inner join t_user u on u.user_id = l.user_id order by l.login_time desc) where rownum&lt;=12
+   </select>
+   <select id="getRank" resultType="Rank">
+      select * from (select r.*,s.shoe_Name from t_rank r inner join t_shoe s on 
+      s.shoe_id = r.shoe_id  order by r.sell_num desc)  where rownum&lt;=12
+   </select>
+   <update id="initRemind" parameterType="java.lang.String">
+      update t_remind set add_user = 0 where user_id = #{userId}
+   </update>
+   
+   <insert id="sendtime" parameterType="java.lang.String">
+      insert into t_sendtime values(#{userId},0)
+   </insert>
+   
+   <parameterMap id="param" type="java.util.Map" > 
+      <parameter property="userid" jdbcType="VARCHAR"  javaType="java.lang.String"  mode="IN"/>
+      <parameter property="time" jdbcType="INTEGER"  javaType="java.lang.Integer"  mode="OUT"/>  
+	</parameterMap>  
+	  
+	<update id="getTime" parameterMap="param" statementType="CALLABLE">  
+	      {call get_time(?,?)}
+	</update>
+	<update id="cutTime" parameterType="java.lang.String">  
+	      update t_sendtime  set  send_time = send_time-1 where user_id = #{userId}
+	</update>
+</mapper>

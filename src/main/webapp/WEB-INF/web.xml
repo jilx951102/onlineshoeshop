@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>Archetype Created Web Application</display-name>
+     <session-config>
+      <session-timeout>60</session-timeout>
+   </session-config>
+   <!-- 加载bean的资源文件 -->
+  <context-param>
+     <param-name>contextConfigLocation</param-name>
+     <param-value>classpath:beans.xml</param-value>
+  </context-param>
+  <!-- 加载struts框架 -->
+  <filter>
+      <filter-name>Struts</filter-name>
+      <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+  </filter>
+  <filter-mapping>
+      <filter-name>Struts</filter-name>
+      <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <!-- 加载bean容器 -->
+  <listener>
+      <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  
+  <!--为了在bean的作用于里用上request-->
+  <listener>
+      <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+  </listener>
+</web-app>

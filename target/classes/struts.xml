@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<constant name="struts.enable.DynamicMethodInvocation" value="false" />
+	<constant name="struts.devMode" value="true" />
+
+	<package name="defaultPackage" namespace="/"
+		extends="struts-default,json-default">
+		<interceptors>
+			<interceptor name="loginInterceptor" class="com.jlx.interceptor.LoginInterceptor" />
+			<interceptor-stack name="myDefaultStack">
+				<interceptor-ref name="loginInterceptor">
+					<!-- <param name="execludeMethods">user_login</param> -->
+				</interceptor-ref>
+				<interceptor-ref name="defaultStack" />
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="myDefaultStack" />
+		<global-results>
+			<result name="backtoAdminlogin">/backtoAdminlogin.jsp</result>
+			<result name="backtologin">/backtologin.jsp</result>
+		</global-results>
+		<!-- 用户的action -->
+		<action name="user_*" class="userAction" method="{1}">
+			<result name="register" type="json">
+				<param name="root">flag</param>
+			</result>
+			<result name="userNameCheck" type="json">
+				<param name="root">flag</param>
+			</result>
+			<result name="userlogin" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="adminLogin" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="fail" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="loginHref" type="json">
+			  <param name="root">href</param>
+			</result>
+			<result name="initLevel">level.jsp</result>
+			<result name="editLevel" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="initPeople">people.jsp</result>
+			<result name="searchPeople">people.jsp</result>
+			<result name="getUserByName" type="json">
+				<param name="root">user</param>
+			</result>
+			<result name="getCode" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="checkCode" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="changePass" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="addintoCart">login.jsp</result>
+<!-- 			<result name="addLogin" type="redirectAction">
+				<param name="actionName">front/shoe_getShowById</param>
+				传递的参数
+				<param name="shoeId">${shoeId}</param>
+				<param name="buyNum">${buyNum}</param>
+			</result> -->
+<!-- 			<result name="cartLogin" type="redirectAction">
+				<param name="actionName">front/cart_gotoCart</param>
+			</result> -->
+			<result name="gotoInfo">info.jsp</result>
+			<result name="gotoinfoedit">infoedit.jsp</result>
+			<result name="editInfo" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="getOldPass" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="changeonePass" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="gotoaddress">address.jsp</result>
+			<result name="gotoaddressedit">addressedit.jsp</result>
+			<result name="getCitybyId" type="json">
+				<param name="root">clist</param>
+			</result>
+			<result name="addAddress" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="setDefault" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="addressEdit2">addressedit.jsp</result>
+			<result name="updateAddress" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="addressDel" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="checkTobuy" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="getAllAdmin">adminList.jsp</result>
+			<result name="searchAdmin">adminList.jsp</result>
+			<result name="addAdmin" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="getAdminByName" type="json">
+				<param name="root">flag</param>
+			</result>
+			<result name="getAdminById">adminInfo.jsp</result>
+			<result name="getAdminById2">adminEdit.jsp</result>
+			<result name="adminEdit" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="cAdminPass">editPass.jsp</result>
+			<result name="editAdminPass" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="adminDel" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="adminDelAll" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="adminchangPass" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="getOldPassById" type="json">
+				<param name="root">flag</param>
+			</result>
+			<result name="loginOut">../adminlogin.jsp</result>
+			<result name="out">login.jsp</result>
+			<result name="gotoChart">chart.jsp</result>
+			<result name="getRemind">welcome.jsp</result>
+			<result name="getMoreSale">findMoreSale.jsp</result>
+			<result name="getMoreLogin">findMorelogin.jsp</result>
+		</action>
+		<!-- 鞋管理 -->
+		<action name="shoe_*" class="shoeAction" method="{1}">
+			<result name="addType" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="getType">type.jsp</result>
+			<result name="initType">type.jsp</result>
+			<result name="typeInfo">typeInfo.jsp</result>
+			<result name="typeEdit">typeEdit.jsp</result>
+			<result name="editType" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="typeDel" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="delAllType" type="json">
+				<param name="root">list</param>
+			</result>
+			<result name="delAllType2" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="initAddShoe">addGoods.jsp</result>
+			<result name="addShoe" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="initShoeOnlone">onLineGoods.jsp</result>
+			<result name="searchShoe">onLineGoods.jsp</result>
+			<result name="watchonLineshoe">shoeInfo.jsp</result>
+			<result name="shoeOff" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="onShoeEdit">shoeEdit.jsp</result>
+			<result name="editShoe" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="offShoeAll" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="initShoeOutline">outLineGoods.jsp</result>
+			<result name="shoeOn" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="shoeDel" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="searchOutLineShoe">outLineGoods.jsp</result>
+			<result name="shoeOnAll" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="shoeDelAll" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="searchByType">goodsShow.jsp</result>
+			<result name="getShowById">goodsInfo.jsp</result>
+			<result name="addIntoCart" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="searchShoeFront">goodsShow.jsp</result>
+			<result name="gointocart" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="gotoBuy">pay.jsp</result>
+		</action>
+		<!-- 关于购物的action -->
+		<action name="cart_*" class="cartAction" method="{1}">
+			<result name="gotoCart">cart.jsp</result>
+			<result name="cartDel" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="cartDelAll" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="gotoPay">pay.jsp</result>
+			<result name="saveRaddress" type="json">
+				<param name="root">payId</param>
+			</result>
+		</action>
+		<!-- 订单action -->
+		<action name="order_*" class="orderAction" method="{1}">
+			<result name="stayOrder">stayOrder.jsp</result>
+			<result name="alReadyOrder">alReadyOrder.jsp</result>
+			<result name="collectOrder">collectOrder.jsp</result>
+			<result name="searchStayOrder">stayOrder.jsp</result>
+			<result name="searchalReadyOrder">alReadyOrder.jsp</result>
+			<result name="searchCollectOrder">collectOrder.jsp</result>
+			<result name="seeOrder">orderInfo.jsp</result>
+			<result name="sendOrder" type="json">
+				<param name="root">addFlag</param>
+			</result>
+			<result name="personOrder">order.jsp</result>
+			<result name="receiveOrder" type="json">
+				<param name="root">addFlag</param>
+			</result>
+			<result name="personBuy">buy.jsp</result>
+			<result name="gotoComment">comment.jsp</result>
+			<result name="comment" type="json">
+				<param name="root">addFlag</param>
+			</result>
+			<result name="personStayOrder">stayOrder.jsp</result>
+			<result name="orderDel" type="json">
+			  <param name="root">addFlag</param>
+			</result>
+		</action>
+		<!-- 评论的action -->
+		<action name="comment_*" class="commentAction" method="{1}">
+			<result name="gotostayComment">stayComment.jsp</result>
+			<result name="searchstayComment">stayComment.jsp</result>
+			<result name="gotoanswer">answer.jsp</result>
+			<result name="answer" type="json">
+				<param name="root">addflag</param>
+			</result>
+			<result name="alReadyComment">alReadyComment.jsp</result>
+			<result name="searchAlreadyComment">alReadyComment.jsp</result>
+			<result name="seeComment">comment.jsp</result>
+			<result name="gotoseeComment">seeComment.jsp</result>
+		</action>
+	</package>
+
+</struts>

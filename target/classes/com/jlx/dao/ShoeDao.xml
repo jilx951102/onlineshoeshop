@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.jlx.dao.ShoeDao">
+<resultMap type="Comment" id="commentMap" autoMapping="true">
+      <id property="commentId" column="comment_id"/>
+      <association property="user" javaType="User" autoMapping="true">
+        <id property="userId" column="user_id"/>
+      </association>
+      <association property="shoe" javaType="Shoe" autoMapping="true">
+         <id property="shoeId" column="shoe_id"/>
+      </association>
+      <association property="answer" javaType="Answer" autoMapping="true">
+         <id property="answerId" column="answer_id"/>
+      </association>
+   </resultMap>
+   <!-- 添加类别 -->
+   <insert id="addType" parameterType="Type">
+      insert into t_type(type_Id,type_Name,type_time)
+      values(#{typeId},#{typeName},sysdate)
+   </insert>  
+   <!-- 检查类别唯一 -->
+   <select id="findTypeByName" parameterType="Type" resultType="java.lang.Integer">
+      select count(1) from t_type where type_name = #{typeName} and type_Flag = 0
+   </select>
+   
+   <!-- 获取所有的类别 -->
+   <select id="getAllType" resultType="Type">
+      select * from t_type  where type_flag = 0  
+      order by TYPE_TIME desc
+   </select>
+   
+    <!-- 获取所有的类别 -->
+   <select id="getAllTypeBytypeName" resultType="Type"  parameterType="java.util.Map">
+      select * from t_type where type_flag = 0 
+      <if test="ts !=''">
+         and  TYPE_NAME like '%'||#{typeName} ||'%' 
+      </if>
+      order by TYPE_TIME desc  
+   </select>
+   
+   <!-- 获取当前页的数据 -->
+   <select id="getTypes" resultType="Type" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_type t where 
+         <if test="ts !=''">
+           t.TYPE_NAME like '%'||#{typeName} ||'%' and
+         </if>        
+       t.TYPE_FLAG =0 order by t.TYPE_TIME desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}
+   </select>
+   
+   <select id="typeInfo" parameterType="java.lang.String" resultType="Type">
+      select * from t_type where type_Id = #{typeId}
+   </select>
+   
+   <update id="editType">
+     update t_type set type_Name = #{typeName}
+     where type_Id = #{typeId}
+   </update>
+   <!-- 查看某个类别下的拥有的鞋数 -->
+   <select id="findShoeBytypeId" parameterType="java.lang.String" resultType="java.lang.Integer">
+      select count(1) from t_shoe
+      where type_id = #{typeId}
+   </select>
+   
+   <update id="typeDel" parameterType="java.lang.String">
+      update t_type set type_Flag= 1
+      where type_Id = #{typeId}
+   </update>
+   
+   <select id="findTypeById" parameterType="java.util.List" resultType="Type">
+      select * from t_type where type_Id =
+      <foreach  item="item" collection="list" separator="or type_id=">
+         #{item}
+      </foreach>
+   </select>
+   <!-- 批量删除 -->
+   <select id="delAllType" parameterType="java.util.List" resultType="Type">
+      update t_type set type_flag = 1 where type_Id =
+      <foreach  item="item" collection="list" separator="or type_id=">
+         #{item}
+      </foreach>
+   </select>
+   <!-- 添加鞋 -->
+   <insert id="addShoe" parameterType="Shoe">
+      insert into t_shoe(shoe_id,shoe_desc,shoe_price,shoe_time,shoe_picture,
+      shoe_stock,shoe_name,type_Id)   
+      values(#{shoeId},#{shoeDesc},#{shoePrice},sysdate,#{shoePicture},
+      #{shoeStock},#{shoeName},#{typeId})
+   </insert>
+   <!-- 添加鞋的提醒 -->
+   <update id="addshoetoremind">
+      update t_remind set add_shoe = add_shoe+1
+   </update>
+   <!-- 初期查询上架的鞋 -->
+   <select id="getOnlineShoe" resultType="Shoe">
+      select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+      where s.shoe_flag = 0 order by s.SHOE_TIME desc
+   </select>
+   <select id="getOnlineShoeDiv" resultType="Shoe" parameterType="java.util.Map">
+       select * from (select a.*,ROWNUM rn from 
+      ( select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+      where s.shoe_flag = 0 order by s.SHOE_TIME desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin} 
+   </select>
+   <!-- 查询分页 -->
+   <select id="searchOnlineShoe" resultType="Shoe" parameterType="Shoe">
+      select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+      where s.shoe_flag = 0 and s.shoe_name like '%'||#{shoeName} ||'%' 
+         <if test='typeId!=""'>
+            and s.type_Id = #{typeId} 
+         </if>
+      order by s.SHOE_TIME desc
+   </select>  
+   <select id="searchOnlineShoeDiv" resultType="Shoe" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+       where s.shoe_flag = 0 and s.shoe_name like '%'||#{shoeName} ||'%' 
+         <if test='typeId!=""'>
+            and s.type_Id = #{typeId} 
+         </if>
+       order by s.SHOE_TIME desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}
+   </select> 
+   <!-- 查看单双鞋的详细信息 -->
+   <select id="watchshoe" parameterType="Shoe" resultType="Shoe">
+      select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+      where s.shoe_Id = #{shoeId} 
+   </select>
+   <!-- 下架鞋 -->
+   <update id="shoeOff" parameterType="java.lang.String" >
+     update t_shoe set shoe_Flag = 1 where shoe_Id = #{shoeId}
+   </update>
+   <!-- 修改鞋的信息 -->
+   <update id="editShoe" parameterType="Shoe">
+      update t_shoe set shoe_name = #{shoeName},
+      type_id = #{typeId},shoe_desc=#{shoeDesc},
+      shoe_price=#{shoePrice},shoe_stock=#{shoeStock}
+      where shoe_id = #{shoeId}
+   </update>
+   
+    <!-- 查询下架的鞋 -->
+   <select id="getOutlineShoe" resultType="Shoe">
+     select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+      where s.shoe_flag = 1 order by s.SHOE_TIME desc
+   </select>
+   <select id="getOutlineShoeDiv" resultType="Shoe" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+     ( select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+     where s.shoe_flag = 1 order by s.SHOE_TIME desc)a
+     where ROWNUM&lt;=#{end})b where b.rn>=#{begin} 
+   </select>
+    <!-- 查询分页 -->
+   <select id="searchOutlineShoe" resultType="Shoe" parameterType="Shoe">
+      select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+      where s.shoe_flag = 1 and s.shoe_name like '%'||#{shoeName} ||'%' 
+         <if test='typeId!=""'>
+            and s.type_Id = #{typeId} 
+         </if>
+      order by s.SHOE_TIME desc
+   </select>  
+   <select id="searchOutlineShoeDiv" resultType="Shoe" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      (select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+       where s.shoe_flag = 1 and s.shoe_name like '%'||#{shoeName} ||'%' 
+         <if test='typeId!=""'>
+            and s.type_Id = #{typeId} 
+         </if>
+       order by s.SHOE_TIME desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}
+   </select> 
+   
+   <update id="shoeOn" parameterType="java.lang.String">
+      update t_shoe set shoe_Flag = 0 where shoe_Id = #{shoeId}
+   </update>
+   <update id="shoeDel" parameterType="java.lang.String">
+      update t_shoe set shoe_Flag = 2 where shoe_Id = #{shoeId}
+   </update>
+   <select id="getShoeBytypeName" parameterType="java.lang.String" resultType="Shoe">
+       select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+       where s.shoe_flag = 0 and t.type_name  like '%'||#{typeName} ||'%' 
+   </select>
+   <select id="getShoeBytypeNameDiv" parameterType="java.util.Map" resultType="Shoe">
+    select * from (select a.*,ROWNUM rn from 
+    (select * from t_shoe s inner join t_type t on s.type_Id = t.type_Id
+     where s.shoe_flag = 0 and t.type_name  like '%'||#{typeName} ||'%'
+     order by s.shoe_time )a
+     where ROWNUM&lt;=#{end})b where b.rn>=#{begin}
+   </select>
+   <!-- 添加商品到购物车 -->
+   <insert id="addIntoCart" parameterType="Cart">
+     insert into t_cart(cart_id,shoe_id,user_id,cart_time,cart_buyNum)
+     values(#{cartId},#{shoeId},#{userId},sysdate,#{cartBuynum})
+   </insert>
+   <select id="findaddNum" parameterType="java.util.Map" resultType="Cart">
+     select c.* from t_cart c where c.shoe_id = #{shoeId}
+     and c.user_id = #{userId} and c.cart_flag = 0
+   </select>
+   <update id="delCartShoe" parameterType="java.util.Map">
+      update t_cart c set c.cart_flag = 1 
+      where c.shoe_id = #{shoeId}
+      and c.user_id = #{userId} and c.cart_flag = 0
+   </update>
+   <select id="getShowStock" parameterType="java.lang.String" resultType="java.lang.Integer">
+      select shoe_stock from t_shoe where shoe_id = #{shoeId}
+   </select>
+   <select id="searchShoeFront" parameterType="java.lang.String" resultType="Shoe">
+       select s.* from t_shoe s inner join t_type t on s.type_id = t.type_id
+       where s.shoe_name  like '%'||#{searchName} ||'%'
+       or  t.type_name like '%'||#{searchName} ||'%' order by s.shoe_time
+   </select>
+     <select id="searchShoeFrontDiv" parameterType="java.util.Map" resultType="Shoe">
+       select * from (select a.*,ROWNUM rn from 
+	   (select s.* from t_shoe s inner join t_type t on s.type_id = t.type_id
+       where s.shoe_name  like '%'||#{searchName} ||'%'
+       or  t.type_name like '%'||#{searchName} ||'%' order by s.shoe_time)a
+	   where ROWNUM&lt;=#{end})b where b.rn>=#{begin}
+   </select>
+   <select id="getCommentByShoeId" parameterType="java.lang.String" resultMap="commentMap">
+       select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id left join t_answer an on
+      an.comment_id = c.comment_id  where s.shoe_id = #{shoeId}
+      order by c.comment_time desc
+   </select>
+   <select id="getCommentByShoeIdDiv" parameterType="java.util.Map" resultMap="commentMap">
+       select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id left join t_answer an on
+      an.comment_id = c.comment_id  where s.shoe_id = #{shoeId}
+      order by c.comment_time desc
+   </select>
+   <select id="getUserById" resultType="User" parameterType="java.lang.String">
+      select * from t_user  where user_id = #{userId} 
+   </select>
+   <select id="getAnswerById" resultType="Answer" parameterType="java.lang.String">
+     select * from t_answer where answer_Id = #{answerId}
+   </select>
+   <update id="initRemind" parameterType="java.lang.String">
+      update t_remind set add_shoe =0 where user_id = #{userId}
+   </update>
+</mapper>

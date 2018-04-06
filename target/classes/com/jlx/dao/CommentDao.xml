@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jlx.dao.CommentDao">
+   <resultMap type="Comment" id="commentMap" autoMapping="true">
+      <id property="commentId" column="comment_id"/>
+      <association property="user" javaType="User" autoMapping="true">
+        <id property="userId" column="user_id"/>
+      </association>
+      <association property="shoe" javaType="Shoe" autoMapping="true">
+         <id property="shoeId" column="shoe_id"/>
+      </association>
+      <association property="answer" javaType="Answer" autoMapping="true">
+         <id property="answerId" column="answer_id"/>
+      </association>
+   </resultMap>
+   <select id="getstayComment" resultMap="commentMap">
+      select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where answer_id is null
+      order by c.comment_time desc
+   </select>
+   <select id="getstayCommentDiv" resultMap="commentMap" parameterType="java.util.Map">
+       select * from (select a.*,ROWNUM rn from 
+      (select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where answer_id is null
+      order by c.comment_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}  
+   </select>
+   <select id="searchstayComment" resultMap="commentMap" parameterType="java.lang.String">
+      select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where answer_id is null
+      and (u.user_realName like '%'||#{searchName} ||'%' or s.shoe_name like '%'||#{searchName} ||'%')
+      order by c.comment_time desc
+   </select>
+   <select id="searchstayCommentDiv" resultMap="commentMap" parameterType="java.util.Map">
+      select * from (select a.*,ROWNUM rn from 
+      ( select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where answer_id is null
+      and (u.user_realName like '%'||#{searchName} ||'%' or s.shoe_name like '%'||#{searchName} ||'%')
+      order by c.comment_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin} 
+   </select>
+   <!-- 进入回复评论界面 -->
+   <select id="getCommentbyId" resultMap="commentMap" parameterType="java.lang.String">
+      select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id where answer_id is null
+      and comment_id = #{commentId}
+   </select>
+   <update id="addanswerId" parameterType="Comment">
+      update t_comment set answer_id = #{answerId}
+      where comment_id = #{commentId}
+   </update>
+   <insert id="addAnswer" parameterType="Answer">
+     insert into t_answer values(#{answerId},#{answerContent},#{commentId},#{userId},sysdate)
+   </insert>
+   <select id="getalRadyComment" resultMap="commentMap">
+       select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id inner join t_answer an on
+      an.comment_id = c.comment_id  where c.answer_id is not null
+      order by c.comment_time desc
+   </select>
+   <select id="getalRadyCommentDiv" parameterType="java.util.Map" resultMap="commentMap">
+      select * from (select a.*,ROWNUM rn from 
+      ( select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id inner join t_answer an on
+      an.comment_id = c.comment_id  where c.answer_id is not null
+      order by c.comment_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}       
+   </select>
+   <select id="searchAeadyComment" parameterType="java.lang.String" resultMap="commentMap">
+      select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id inner join t_answer an on
+      an.comment_id = c.comment_id  where c.answer_id is not null
+      and (u.user_realName like '%'||#{searchName} ||'%' or s.shoe_name like '%'||#{searchName} ||'%'
+      or us.user_realName like '%'||#{searchName} )
+      order by c.comment_time desc
+   </select>
+   <select id="searchAeadyCommentDiv" parameterType="java.util.Map" resultMap="commentMap">
+       select * from (select a.*,ROWNUM rn from 
+      ( select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id inner join t_answer an on
+      an.comment_id = c.comment_id  where c.answer_id is not null
+      and (u.user_realName like '%'||#{searchName} ||'%' or s.shoe_name like '%'||#{searchName} ||'%'
+      or us.user_realName like '%'||#{searchName})
+      order by c.comment_time desc)a
+      where ROWNUM&lt;=#{end})b where b.rn>=#{begin}      
+   </select>
+   <select id="getUserById" resultType="User" parameterType="java.lang.String">
+      select * from t_user  where user_id = #{userId} 
+   </select>
+   <select id="getAnswerById" resultType="Answer" parameterType="java.lang.String">
+     select * from t_answer where answer_Id = #{answerId}
+   </select>
+   <select id="getCommentById2" resultMap="commentMap" parameterType="java.lang.String" >
+      select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id inner join t_answer an on
+      an.comment_id = c.comment_id  where c.comment_id = #{commentId}
+   </select>
+   <select id="getCommentByorderId" resultMap="commentMap" parameterType="java.lang.String">
+      select * from t_comment c inner join t_order o on 
+      c.order_id = o.order_id inner join t_user u on
+      c.user_id = u.user_id inner join t_shoe s on
+      o.shoe_id = s.shoe_id left join t_answer an on
+      an.comment_id = c.comment_id  where c.order_id = #{orderId}
+   </select>
+   
+   <update id="initRemind" parameterType="java.lang.String">
+      update t_remind set add_comment = 0 where user_id = #{userId}
+   </update>
+</mapper>

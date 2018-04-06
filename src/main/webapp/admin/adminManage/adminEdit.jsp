@@ -1,0 +1,125 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html >
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../../css/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="../../css/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="../../css/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="../../css/h-ui.admin/skin/default/skin.css" id="skin" />
+<link rel="stylesheet" type="text/css" href="../../css/h-ui.admin/css/style.css" />
+<style type="text/css">
+ label.error{
+  position:relative;
+  right: -2px;
+  top:0px;
+  display: block;
+}
+</style>
+</head>
+<body>
+<form action="" id="ruleForm">
+<input type="hidden" value=${user.userId } name="user.userId" >
+   <table class="table">
+       
+	  <tr>
+	    <td class="text-r">真实姓名</td>
+	    <td>
+	       <input class="input-text radius" value="${user.userRealname }" name="user.userRealname" style="width: 250px" placeholder="真实姓名">
+	    </td>
+	  </tr>
+	  <tr>
+	    <td class="text-r">手机</td>
+	    <td><input class="input-text radius" value="${user.userPhone }" name="user.userPhone" style="width: 250px" placeholder="手机号码"></td>
+	  </tr>
+	  <tr>
+	    <td class="text-r">邮箱</td>
+	    <td><input class="input-text radius" value="${user.userEmail }" name="user.userEmail" style="width: 250px" placeholder="邮箱"></td>
+	  </tr>
+	  <tr>
+	     <td colspan="2">
+	       <button class="	btn btn-secondary radius" onclick="editAdmin()" type="button" style="margin-left: 22%">确认</button>
+	       <button class="	btn btn-secondary radius" type="reset">重置</button>
+	     </td>
+	  </tr>
+	</table>
+</form>
+</body>
+<script type="text/javascript" src="../../js/jquery.min.js"></script> 
+<script type="text/javascript" src="../../js/validate/jquery.validate-1.13.1.js"></script>
+<script type="text/javascript" src="../../js/layer/2.4/layer.js"></script>
+<script type="text/javascript">
+$(function(){
+	  $("#ruleForm").validate({
+		  rules:{			 
+			  'user.userRealname':{
+				  required:true,
+				  userRealname:true,
+			  },
+			  'user.userPhone':{
+				  required:true,
+				  phoneNumber:true,
+			  },
+		      'user.userEmail':{
+		    	  required:true, 
+		    	  email:true,
+		      }
+		  },
+		  messages:{
+			  'user.userRealname':{
+				  required:"昵称必填",
+			  },
+			  'user.userPhone':{
+				  required:"手机号码必填",
+			  },
+		      'user.userEmail':{
+		    	  required:"邮箱必填", 
+		      }
+		  }
+	  })
+	  
+	  $.validator.addMethod("userRealname",function(value,element,parmas){
+		  return value.length<=10;
+	  },"姓名长度不得超过10");
+	   $.validator.addMethod("phoneNumber",function(value,element,parmas){			  
+		   var v = /^1[3|4|5|8][0-9]\d{8}$/;  
+		   return this.optional(element) || v.test(value);
+		  },"输入正确的号码");
+	   $.validator.addMethod("email",function(value,element,parmas){			  
+		   var v = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;  
+		   return v.test(value) || this.optional(element);
+		  },"填写正确的邮箱地址  例:001Abc@lenovo.com.cn");
+})
+function editAdmin(){
+	if($("#ruleForm").valid()){
+		 $.ajax({
+			   url:'user_adminEdit',
+			   data:$("form").serialize(),
+			   success:function(data){
+				   if(data===1){
+					   layer.msg("修改成功",{
+						   icon:1,
+						   time:1500
+					   },function(){
+						   parent.window.location.reload();
+						   var i = parent.layer.getFrameIndex();
+						   parent.layer.close(i);
+					   })
+				   }else{
+					   layer.msg("修改失败",{
+						   icon:2,
+						   time:1500
+					   })
+				   }
+			   }
+		   })
+	}
+}
+
+</script>
+</html>
