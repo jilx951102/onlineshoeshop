@@ -19,7 +19,7 @@ public class Timmer{
 			public void run() {
 				session.removeAttribute("code");				
 			}
-		},1000*60*5);
+		},1000*60*1);
 		
 	}
 	

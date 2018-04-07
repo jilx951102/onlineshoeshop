@@ -132,7 +132,7 @@
     <div class="col-4" style="float: left ">
        <span style="font-size: large;"><i class="Hui-iconfont">&#xe611;</i>登录记录</span>
        <c:if test="${fn:length(LoginLogList)>5 }">
-          <span style="float: right" onclick="findMorelogin('登录记录(仅列出12条)','400px','${fn:length(LoginLogList)*45}px','admin/user_getMoreLogin')">更多<i class="Hui-iconfont">&#xe717;</i></span>
+          <span style="float: right" onclick="findMorelogin('登录记录(仅列出12条)','400px','${fn:length(LoginLogList)*47.5}px','admin/user_getMoreLogin')">更多<i class="Hui-iconfont">&#xe717;</i></span>
        </c:if>
        <table class="table table-border table-bg table-hover">
            <tr>
@@ -342,7 +342,7 @@ function init(){
   }
   
   function gotoUser(){
-	  creatIframe('user_gotoUser','会员列表')
+	  creatIframe('peopleManage/user_gotoUser','会员列表')
   }
   
   function gotoOrder(){
@@ -352,7 +352,7 @@ function init(){
 	  creatIframe('comment/comment_gotoComment','未回复评论')
   }
   function gotoShoe(){
-	  creatIframe('shoe_gotoShoe','上架商品列表')
+	  creatIframe('GoodsManage/shoe_gotoShoe','上架商品列表')
   }
 
 </script>

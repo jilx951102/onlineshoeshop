@@ -47,15 +47,6 @@ public enum uploadUtil {
 		
 	}
 	
-/*	public List<Shoe> uploadImg(List<Shoe> list){
-		if(list.size()>0){
-			for(int i =0;i<list.size();i++){
-               list.get(i).setShoePicture(tupian.path+"\\"+list.get(i).getShoePicture());
-				
-			}
-		}
-		return list;
-	}*/
 
 	public String getPath() {
 		return path;

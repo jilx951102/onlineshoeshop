@@ -303,10 +303,10 @@ public class UserAction {
 
 	// 修改用户信息
 	public String editInfo() throws IOException {
-		if (userPicture != null && user.getUserPicture() == null) {
+		if (userPicture != null && "".equals(user.getUserPicture())) {
 			user.setUserPicture(uploadUtil.touxiang.upload(userPicture, userPictureFileName));
 		}
-		if (user.getUserPicture() != null && userPicture != null) {
+		if (!"".equals(user.getUserPicture()) && userPicture != null) {
 			uploadUtil.touxiang.upload2(userPicture, user.getUserPicture());
 		}
 		if (userBirthday != null && userBirthday != "") {

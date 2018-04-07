@@ -100,7 +100,7 @@ layui.use(['util', 'laydate', 'layer','laypage'], function(){
 		        	 if($("#place").html().substring(0,2)=="搜索"){
 		  	    	   location.href = 'shoe_searchShoeFront?currentPage='+obj.curr+"&searchName="+searchName;
 		  	       }else{
-		  	    	   location.href = "shoe_searchByType?typeName="+obj.curr+"&currentPage="+num+"&liActive="+liActive
+		  	    	   location.href = "shoe_searchByType?typeName="+typeName+"&currentPage="+obj.curr+"&liActive="+liActive
 		  	       }
 		         }
 		        }

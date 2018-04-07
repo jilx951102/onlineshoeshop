@@ -138,7 +138,6 @@ label.error{
 		   $("#roleForm").attr("action","user_editInfo");
 		   $("#roleForm").ajaxSubmit({
 			  url:'user_editInfo',
-			  data:$("form").serialize(),
 			  type:'post',
 			  success:function(data){
 				  if(data===1){
